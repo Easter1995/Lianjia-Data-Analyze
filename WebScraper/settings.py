@@ -29,9 +29,10 @@ ROBOTSTXT_OBEY = False
 # Configure a delay for requests for the same website (default: 0)
 # See https://docs.scrapy.org/en/latest/topics/settings.html#download-delay
 # See also autothrottle settings and docs
-#DOWNLOAD_DELAY = 3
+DOWNLOAD_DELAY = 1
+RANDOMIZE_DOWNLOAD_DELAY = True  # 随机化间隔时间
 # The download delay setting will honor only one of:
-#CONCURRENT_REQUESTS_PER_DOMAIN = 16
+CONCURRENT_REQUESTS_PER_DOMAIN = 16
 #CONCURRENT_REQUESTS_PER_IP = 16
 
 # Disable cookies (enabled by default)
@@ -76,11 +77,8 @@ MEDIA_ALLOW_REDIRECTS =True
 ITEM_PIPELINES = {
     'WebScraper.pipelines.NewHousePipeline': 300,        # 激活新房爬虫的管道
     'WebScraper.pipelines.SecondHandHousePipeline': 300, # 激活二手房爬虫的管道
-    'WebScraper.pipelines.BeijingRentHousePipeline': 300, # 激活北京租房爬虫的管道
-    'WebScraper.pipelines.ShanghaiRentHousePipeline': 300, # 激活上海租房爬虫的管道
-    'WebScraper.pipelines.GuangzhouRentHousePipeline': 300, # 激活广州租房爬虫的管道
-    'WebScraper.pipelines.ShenzhenRentHousePipeline': 300, # 激活深圳租房爬虫的管道
-    'WebScraper.pipelines.DaliRentHousePipeline': 300 # 激活大理租房爬虫的管道
+    'WebScraper.pipelines.LianjiaPipeline': 300
+
 }
 
 # Enable and configure the AutoThrottle extension (disabled by default)

@@ -22,6 +22,7 @@ class SecondHandHouse(scrapy.Item):
     totalPrice = scrapy.Field()
 
 class RentHouseItem(scrapy.Item):
+    city = scrapy.Field() # 城市名字
     name = scrapy.Field() # 楼盘名字
     district = scrapy.Field() # 行政区
     street = scrapy.Field() # 街道
