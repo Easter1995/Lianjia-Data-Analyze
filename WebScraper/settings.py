@@ -46,7 +46,7 @@ DEFAULT_REQUEST_HEADERS = {
     'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
     'Accept-Encoding': 'gzip, deflate, br, zstd',
     'Accept-Language': 'zh-CN,zh;q=0.9,en-US;q=0.8,en;q=0.7,en-GB;q=0.6,de;q=0.5,zh-TW;q=0.4',
-    'Cookie': 'lianjia_uuid=383a9d1a-4f60-4242-85b0-ed9f3900fd2f; _ga=GA1.2.1992447000.1730190757; …'
+    'Cookie': 'lianjia_uuid=383a9d1a-4f60-4242-85b0-ed9f3900fd2f; _ga=GA1.2.1992447000.1730190757;'
 }
 
 # Enable or disable spider middlewares
@@ -76,6 +76,11 @@ MEDIA_ALLOW_REDIRECTS =True
 ITEM_PIPELINES = {
     'WebScraper.pipelines.NewHousePipeline': 300,        # 激活新房爬虫的管道
     'WebScraper.pipelines.SecondHandHousePipeline': 300, # 激活二手房爬虫的管道
+    'WebScraper.pipelines.BeijingRentHousePipeline': 300, # 激活北京租房爬虫的管道
+    'WebScraper.pipelines.ShanghaiRentHousePipeline': 300, # 激活上海租房爬虫的管道
+    'WebScraper.pipelines.GuangzhouRentHousePipeline': 300, # 激活广州租房爬虫的管道
+    'WebScraper.pipelines.ShenzhenRentHousePipeline': 300, # 激活深圳租房爬虫的管道
+    'WebScraper.pipelines.DaliRentHousePipeline': 300 # 激活大理租房爬虫的管道
 }
 
 # Enable and configure the AutoThrottle extension (disabled by default)
