@@ -1,5 +1,7 @@
 import scrapy
 import re
+
+import scrapy.resolver
 from WebScraper.items import RentHouseItem
 from scrapy_selenium import SeleniumRequest
 import time
@@ -8,8 +10,8 @@ import random
 class LianjiaSpider(scrapy.Spider):
     name = "lianjia"
     allowed_domains = ["lianjia.com"]
-    city_names = ['dali']
-    # city_names = ['bj', 'sh', 'gz', 'sz', 'dali']
+    # city_names = ['sz', 'sh']
+    city_names = ['bj', 'sh', 'gz', 'sz']
     cookies = {
         "lianjia_uuid": "33bb9625-0e1b-40ac-8a0f-884b7c574e94",
         "Hm_lvt_46bf127ac9b856df503ec2dbf942b67e": "1732357750,1732608637,1732627932,1734012811",
@@ -25,9 +27,10 @@ class LianjiaSpider(scrapy.Spider):
         "lianjia_token": "2.0012803a70453ab31b032d134151f3baf8",
         "lianjia_token_secure": "2.0012803a70453ab31b032d134151f3baf8",
         "security_ticket": "EUtjTccMx5nei42GfXNMtiAZuyZg66PYjxCd99yBl203g6oQB6ZLtVDRO+mOTmVhn17L9on4JzzWuDlZ0KwPBlIJv0TIW0zs3frUCoIxO/AEoCJu99OLlFAJ305bLnFBuhedNr9Yym8VkspxLWqm2vTe/qbDAu8qyQD9kylBxHo=",
-        "select_city": "532900",
+        "select_city": "110000",
         "beikeBaseData": "%7B%22parentSceneId%22%3A%222021652502261744129%22%7D",
-        "lianjia_ssid": "7a74d013-1429-4e76-a0e9-acab6b356448"
+        "lianjia_ssid": "dbfc4eb1-cc69-4759-827a-a02d98eea938",
+        "hip": "1VzdKhw6CmsWTeLG6KzwTT93Oq5zbaXCYiyxxWNyQ4c7Ghyu3_NCDCGSGNiKEuAZlcue9dE7gzJRCU7SUVBNa2v_-12IH1cfud4Utzl5-3ExLhPZqbAOPOlDH5mtSW6L_zhDmAnGQJyikrqc4rD1NLVNZ_RAj2VlEjPAGIk_kmsXT33J25Uc2OUmfA%3D%3D"
     }
 
     def get_start_urls(self):
@@ -38,18 +41,30 @@ class LianjiaSpider(scrapy.Spider):
         return urls
     
     def get_district(self, response):
+        captcha_button = response.xpath('//*[@id="captcha"]/div')
+        if captcha_button:
+            self.logger.info("Captcha detected. Pausing execution...")
+            time.sleep(30)  # 暂停30秒
+            return  # 返回，暂停后不继续执行后续代码
+
         city_name = response.meta['city_name']
         district_list = response.xpath('//*[@id="filter"]/ul[2]/li')
         for dis in district_list[1:]:
             dis_str = dis.xpath('./a/@href').get().strip().split('/')[2]
             # 每个区的起始url
             district_url = f"https://{city_name}.lianjia.com/zufang/{dis_str}/"
-            yield SeleniumRequest(url=district_url, cookies=self.cookies, callback=self.get_area, meta={
+            yield scrapy.Request(url=district_url, cookies=self.cookies, callback=self.get_area, meta={
                 'city_name': city_name,
                 'district_name': dis_str
             })
 
     def get_area(self, response):
+        captcha_button = response.xpath('//*[@id="captcha"]/div')
+        if captcha_button:
+            self.logger.info("Captcha detected. Pausing execution...")
+            time.sleep(30)  # 暂停30秒
+            return # 返回，暂停后不继续执行后续代码
+        
         urls = []
         city_name = response.meta['city_name']
         area_href_list = response.xpath('//*[@id="filter"]/ul[4]/li/a')
@@ -61,7 +76,7 @@ class LianjiaSpider(scrapy.Spider):
             urls.append((tmp_url, area_str))
 
         for url in urls[1:]:
-            yield SeleniumRequest(url=url[0], cookies=self.cookies, callback=self.parse, meta={
+            yield scrapy.Request(url=url[0], cookies=self.cookies, callback=self.parse, meta={
                 'city_name': city_name,
                 'area_str': url[1],
                 'page': 1,
@@ -70,13 +85,19 @@ class LianjiaSpider(scrapy.Spider):
     def start_requests(self):    
         for name in self.city_names:
             # 每个城市的起始url
-            yield SeleniumRequest(url=f"https://{name}.lianjia.com/zufang/", cookies=self.cookies, callback=self.get_district, meta={'city_name': name})
+            yield scrapy.Request(url=f"https://{name}.lianjia.com/zufang/", cookies=self.cookies, callback=self.get_district, meta={'city_name': name})
 
     def parse(self, response):
+        captcha_button = response.xpath('//*[@id="captcha"]/div')
+        if captcha_button:
+            self.logger.info("Captcha detected. Pausing execution...")
+            time.sleep(30)  # 暂停30秒，你可以根据需要调整
+            return  # 返回，暂停后不继续执行后续代码
+
         page_empty = bool(response.xpath('//div[@class="content__empty1"]'))  # 超出页数范围,会有这个标签
         city_name = response.meta['city_name']  # 从 URL 中提取城市名称
         area = response.meta['area_str']
-        page = response.meta['page']
+        page = int(response.meta['page'])
         if not page_empty:
             content_list = response.xpath('//*[@id="content"]/div[1]/div[1]/div')
             for content in content_list:
@@ -84,35 +105,52 @@ class LianjiaSpider(scrapy.Spider):
                 ad = content.xpath('.//p[@class="content__list--item--ad"]/text()').get()
                 if ad:
                     continue
+                
+                # 跳过一些不规范的数据
+                room_left = content.xpath('.//p[@class="content__list--item--des"]//span[@class="room__left"]')
+                if room_left:
+                    continue
+
                 house = RentHouseItem()
                 house['city'] = city_name
                 house['name'] = content.xpath('./div/p[1]/a/text()').get().strip()
-                house['district'] = content.xpath('./div/p[2]/a[1]/text()').get()
-                house['street'] = content.xpath('./div/p[2]/a[2]/text()').get()
-                house['community'] = content.xpath('./div/p[2]/a[3]/text()').get()
+                house['district'] = content.xpath('./div/p[2]/a[1]/text()').get() or None
+                house['street'] = content.xpath('./div/p[2]/a[2]/text()').get() or None
+                house['community'] = content.xpath('./div/p[2]/a[3]/text()').get() or None
                 price = content.xpath('./div/span/em/text()').get()
                 # 如果是价格区间，则取其平均数
                 if '-' in price:
                     start, end = map(int, price.split('-'))
                     price = str((start + end) / 2)
-                house['price'] = int(price)
+                if '.' in price:
+                    house['price'] = int(float(price))  # 转换为浮动数后再转为整数
+                else:
+                    house['price'] = int(price)  # 直接转换为整数
                 des = content.xpath('.//p[@class="content__list--item--des"]').get().strip()
-                sq = re.search(r'([\d.]+)㎡', des).group(1)
-                house['square'] = float(sq)
-                dir = re.search(r'<i>/</i>(.*)<i>/</i>', des).group(1)
-                house['direction'] = dir.strip()
-                lay = re.search(r'<i>/</i>\n(.*)<span class="hide">', des).group(1)
-                house['layout'] = lay.strip()
-                yield house
-        
-            # 随机休眠1-2秒
-            delay = random.uniform(1, 2)
-            time.sleep(delay)
+                try:
+                    sq = re.search(r'([\d.]+)㎡', des).group(1)
+                    house['square'] = float(sq)
+                except AttributeError:
+                    house['square'] = None
 
-            if page != "pg100":
-                next_page = int(page) + 1
+                try:
+                    dir = re.search(r'<i>/</i>(.*)<i>/</i>', des).group(1)
+                    house['direction'] = dir.strip()
+                except AttributeError:
+                    house['direction'] = None 
+
+                try:
+                    lay = re.search(r'<i>/</i>\n(.*)<span class="hide">', des).group(1)
+                    house['layout'] = lay.strip()
+                except AttributeError:
+                    house['layout'] = None
+                yield house
+
+            # 爬取前100页
+            if page <= 100:
+                next_page = page + 1
                 next_url = f"https://{city_name}.lianjia.com/zufang/{area}/pg{next_page}/"
-                yield SeleniumRequest(url=next_url, cookies=self.cookies, callback=self.parse, meta={
+                yield scrapy.Request(url=next_url, cookies=self.cookies, callback=self.parse, meta={
                     'city_name': city_name,
                     'area_str': area,
                     'page': next_page,
