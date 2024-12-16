@@ -10,7 +10,7 @@ import json
 class LianjiaSpider(scrapy.Spider):
     name = "lianjia"
     allowed_domains = ["lianjia.com"]
-    # city_names = ['bj', 'sh', 'sz', 'gz', 'dali']
+    city_names = ['bj', 'sh', 'sz', 'gz', 'dali']
     
     cookies = {
         "lianjia_uuid": "33bb9625-0e1b-40ac-8a0f-884b7c574e94",
@@ -41,23 +41,24 @@ class LianjiaSpider(scrapy.Spider):
 
     def start_requests(self):    
         # 读取 JSON 文件
-        with open('url_data/gz.json', 'r', encoding='utf-8') as f:
-            data = json.load(f)
-        
-        # 遍历 JSON 文件中的数据
-        for entry in data:
-            total = int(entry['total'])
-            pages = int(entry['pages'])
-            base_url = entry['url']
+        for name in self.city_names:
+            with open(f'url_data/{name}.json', 'r', encoding='utf-8') as f:
+                data = json.load(f)
             
-            # 如果 total 为 0，跳过这个 entry
-            if total == 0:
-                continue
-            
-            # 构造分页 URL，从 pg1 到 pg{pages}
-            for page in range(1, pages + 1):
-                url = base_url.replace('pg1', f'pg{page}')
-                yield scrapy.Request(url, callback=self.parse, meta={'city': entry['city'], 'district': entry['district'], 'area': entry['area']})
+            # 遍历 JSON 文件中的数据
+            for entry in data:
+                total = int(entry['total'])
+                pages = int(entry['pages'])
+                base_url = entry['url']
+                
+                # 如果 total 为 0，跳过这个 entry
+                if total == 0:
+                    continue
+                
+                # 构造分页 URL，从 pg1 到 pg{pages}
+                for page in range(1, pages + 1):
+                    url = base_url.replace('pg1', f'pg{page}')
+                    yield scrapy.Request(url, callback=self.parse, meta={'city': entry['city'], 'district': entry['district'], 'area': entry['area']})
 
     def parse(self, response):
         captcha_button = response.xpath('//*[@id="captcha"]/div')

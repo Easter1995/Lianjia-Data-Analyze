@@ -34,9 +34,9 @@ class RentHouseItem(scrapy.Item):
     layout = scrapy.Field() # 房型
 
 class RentHouseURLs(scrapy.Item):
-    city = scrapy.Field()
-    district = scrapy.Field()
-    area = scrapy.Field()
-    url = scrapy.Field()
-    total = scrapy.Field()
-    pages = scrapy.Field()
+    city = scrapy.Field() # 城市
+    district = scrapy.Field() # 行政区
+    area = scrapy.Field() # 街道 
+    url = scrapy.Field() # 第一页的url
+    total = scrapy.Field() # 总数据量
+    pages = scrapy.Field() # 总页数

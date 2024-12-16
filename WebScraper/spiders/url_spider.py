@@ -4,7 +4,8 @@ from WebScraper.items import RentHouseURLs
 class UrlSpiderSpider(scrapy.Spider):
     name = "url_spider"
     allowed_domains = ["lianjia.com"]
-    city_names = ['bj']
+    city_names = ['bj', 'sh', 'sz', 'gz', 'dali']
+    
     cookies = {
         "lianjia_uuid": "33bb9625-0e1b-40ac-8a0f-884b7c574e94",
         "Hm_lvt_46bf127ac9b856df503ec2dbf942b67e": "1732357750,1732608637,1732627932,1734012811",
@@ -76,6 +77,6 @@ class UrlSpiderSpider(scrapy.Spider):
             })
 
     def start_requests(self):    
-        # for name in self.city_names:
+        for name in self.city_names:
             # 每个城市的起始url
-        yield scrapy.Request(url=f"https://sz.lianjia.com/zufang/yantianqu/", cookies=self.cookies, callback=self.get_area, meta={'city_name': 'sz', 'district_name': 'yantianqu'})
+            yield scrapy.Request(url=f"https://{name}.lianjia.com/zufang/", cookies=self.cookies, callback=self.get_district, meta={'city_name': name})
