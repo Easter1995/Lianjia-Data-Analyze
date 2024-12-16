@@ -41,7 +41,7 @@ class LianjiaSpider(scrapy.Spider):
 
     def start_requests(self):    
         # 读取 JSON 文件
-        with open('url_data/sz.json', 'r', encoding='utf-8') as f:
+        with open('url_data/gz.json', 'r', encoding='utf-8') as f:
             data = json.load(f)
         
         # 遍历 JSON 文件中的数据
