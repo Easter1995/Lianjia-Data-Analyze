@@ -5,13 +5,13 @@ import scrapy.resolver
 from WebScraper.items import RentHouseItem
 from scrapy_selenium import SeleniumRequest
 import time
-import random
+import json
 
 class LianjiaSpider(scrapy.Spider):
     name = "lianjia"
     allowed_domains = ["lianjia.com"]
-    # city_names = ['sz', 'sh']
-    city_names = ['bj', 'sh', 'gz', 'sz']
+    # city_names = ['bj', 'sh', 'sz', 'gz', 'dali']
+    
     cookies = {
         "lianjia_uuid": "33bb9625-0e1b-40ac-8a0f-884b7c574e94",
         "Hm_lvt_46bf127ac9b856df503ec2dbf942b67e": "1732357750,1732608637,1732627932,1734012811",
@@ -33,59 +33,31 @@ class LianjiaSpider(scrapy.Spider):
         "hip": "1VzdKhw6CmsWTeLG6KzwTT93Oq5zbaXCYiyxxWNyQ4c7Ghyu3_NCDCGSGNiKEuAZlcue9dE7gzJRCU7SUVBNa2v_-12IH1cfud4Utzl5-3ExLhPZqbAOPOlDH5mtSW6L_zhDmAnGQJyikrqc4rD1NLVNZ_RAj2VlEjPAGIk_kmsXT33J25Uc2OUmfA%3D%3D"
     }
 
-    def get_start_urls(self):
-        urls = []
-        for name in self.city_names:
-            # 每个城市的起始url
-            urls.append(f"https://{name}.lianjia.com/zufang/")
-        return urls
-    
-    def get_district(self, response):
-        captcha_button = response.xpath('//*[@id="captcha"]/div')
-        if captcha_button:
-            self.logger.info("Captcha detected. Pausing execution...")
-            time.sleep(30)  # 暂停30秒
-            return  # 返回，暂停后不继续执行后续代码
-
-        city_name = response.meta['city_name']
-        district_list = response.xpath('//*[@id="filter"]/ul[2]/li')
-        for dis in district_list[1:]:
-            dis_str = dis.xpath('./a/@href').get().strip().split('/')[2]
-            # 每个区的起始url
-            district_url = f"https://{city_name}.lianjia.com/zufang/{dis_str}/"
-            yield scrapy.Request(url=district_url, cookies=self.cookies, callback=self.get_area, meta={
-                'city_name': city_name,
-                'district_name': dis_str
-            })
-
-    def get_area(self, response):
-        captcha_button = response.xpath('//*[@id="captcha"]/div')
-        if captcha_button:
-            self.logger.info("Captcha detected. Pausing execution...")
-            time.sleep(30)  # 暂停30秒
-            return # 返回，暂停后不继续执行后续代码
-        
-        urls = []
-        city_name = response.meta['city_name']
-        area_href_list = response.xpath('//*[@id="filter"]/ul[4]/li/a')
-        for area in area_href_list:
-            area_str = area.xpath('./@href').get().strip().split('/')[2]
-            area_url = f"https://{city_name}.lianjia.com/zufang/{area_str}/"
-            # 每个街道的起始url
-            tmp_url = f"{area_url}pg1"
-            urls.append((tmp_url, area_str))
-
-        for url in urls[1:]:
-            yield scrapy.Request(url=url[0], cookies=self.cookies, callback=self.parse, meta={
-                'city_name': city_name,
-                'area_str': url[1],
-                'page': 1,
-            })
+    custom_settings = {
+        'ITEM_PIPELINES': {
+            'WebScraper.pipelines.LianjiaPipeline': 543
+        }
+    }
 
     def start_requests(self):    
-        for name in self.city_names:
-            # 每个城市的起始url
-            yield scrapy.Request(url=f"https://{name}.lianjia.com/zufang/", cookies=self.cookies, callback=self.get_district, meta={'city_name': name})
+        # 读取 JSON 文件
+        with open('url_data/sz.json', 'r', encoding='utf-8') as f:
+            data = json.load(f)
+        
+        # 遍历 JSON 文件中的数据
+        for entry in data:
+            total = int(entry['total'])
+            pages = int(entry['pages'])
+            base_url = entry['url']
+            
+            # 如果 total 为 0，跳过这个 entry
+            if total == 0:
+                continue
+            
+            # 构造分页 URL，从 pg1 到 pg{pages}
+            for page in range(1, pages + 1):
+                url = base_url.replace('pg1', f'pg{page}')
+                yield scrapy.Request(url, callback=self.parse, meta={'city': entry['city'], 'district': entry['district'], 'area': entry['area']})
 
     def parse(self, response):
         captcha_button = response.xpath('//*[@id="captcha"]/div')
@@ -95,9 +67,8 @@ class LianjiaSpider(scrapy.Spider):
             return  # 返回，暂停后不继续执行后续代码
 
         page_empty = bool(response.xpath('//div[@class="content__empty1"]'))  # 超出页数范围,会有这个标签
-        city_name = response.meta['city_name']  # 从 URL 中提取城市名称
-        area = response.meta['area_str']
-        page = int(response.meta['page'])
+        city_name = response.meta['city']  # 从 URL 中提取城市名称
+        
         if not page_empty:
             content_list = response.xpath('//*[@id="content"]/div[1]/div[1]/div')
             for content in content_list:
@@ -130,8 +101,10 @@ class LianjiaSpider(scrapy.Spider):
                 try:
                     sq = re.search(r'([\d.]+)㎡', des).group(1)
                     house['square'] = float(sq)
+                    house['price_per_m2'] = round(float(price) / float(sq), 2)
                 except AttributeError:
                     house['square'] = None
+                    house['price_per_m2'] = None
 
                 try:
                     dir = re.search(r'<i>/</i>(.*)<i>/</i>', des).group(1)
@@ -145,13 +118,3 @@ class LianjiaSpider(scrapy.Spider):
                 except AttributeError:
                     house['layout'] = None
                 yield house
-
-            # 爬取前100页
-            if page <= 100:
-                next_page = page + 1
-                next_url = f"https://{city_name}.lianjia.com/zufang/{area}/pg{next_page}/"
-                yield scrapy.Request(url=next_url, cookies=self.cookies, callback=self.parse, meta={
-                    'city_name': city_name,
-                    'area_str': area,
-                    'page': next_page,
-                })

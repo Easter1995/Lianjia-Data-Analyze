@@ -29,5 +29,14 @@ class RentHouseItem(scrapy.Item):
     community = scrapy.Field() # 小区
     price = scrapy.Field() # 价格 元/月
     square = scrapy.Field() # 面积 平方米
+    price_per_m2 = scrapy.Field() # 单位面积的价格 元
     direction = scrapy.Field() # 朝向
     layout = scrapy.Field() # 房型
+
+class RentHouseURLs(scrapy.Item):
+    city = scrapy.Field()
+    district = scrapy.Field()
+    area = scrapy.Field()
+    url = scrapy.Field()
+    total = scrapy.Field()
+    pages = scrapy.Field()

@@ -328,17 +328,19 @@ class LianjiaProxyMiddleware(object):
             return request
  
     def get_proxy(self):
-        response = requests.get('https://share.proxy.qg.net/get?key=643E2DA4&pwd=3531DC39E3D6&num=5&area=&isp=0&format=json&distinct=false')
-        
-        if response.status_code == 200:
-            res_data = response.json()
-            proxys = []
-            if res_data['code'] == "SUCCESS":
-                for p in res_data['data']:
-                    proxys.append(p['server'])
-                return proxys
-        else:
-            return []
+        for _ in range(3):  # 尝试 3 次
+            try:
+                response = requests.get('https://share.proxy.qg.net/get?key=643E2DA4&num=2')
+                if response.status_code == 200:
+                    res_data = response.json()
+                    if res_data['code'] == "SUCCESS":
+                        return [p['server'] for p in res_data['data']]
+                    else:
+                        self.logger.error(f"代理池返回错误: {res_data}")
+                time.sleep(2)  # 暂停 2 秒后重试
+            except requests.RequestException:
+                time.sleep(2)  # 请求异常时重试
+        return []  # 如果都失败了，返回空列表
  
     def update_proxies(self):
         self.proxies = []
