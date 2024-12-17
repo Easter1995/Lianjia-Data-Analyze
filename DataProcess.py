@@ -18,18 +18,6 @@ def data_merge():
     # 合并数据
     merged_data = []
 
-    for name in city_names:
-        data = pd.read_json(f'original_data/{name}.json')
-        merged_data.append(data)
-
-    combined_df = pd.concat(merged_data, ignore_index=True)
-
-    # 将 'city' 列中的英文名映射为中文名
-    combined_df['城市'] = combined_df['city'].map(city_mapping)
-
-    # 提取居室的信息
-    combined_df['居室'] = combined_df['layout'].apply(extract_room)
-
     # 重命名列头为中文
     columns = {
         "city": "城市代号",
@@ -45,8 +33,16 @@ def data_merge():
         "layout": "户型",
         "居室": "居室"
     }
-    combined_df = combined_df.rename(columns=columns)
 
+    for name in city_names:
+        data = pd.read_json(f'original_data/{name}.json')
+        data['城市'] = data['city'].map(city_mapping)
+        data['居室'] = data['layout'].apply(extract_room)
+        data = data.rename(columns=columns)
+        data.to_csv(f'processed_data/{name}.csv')
+        merged_data.append(data)
+
+    combined_df = pd.concat(merged_data, ignore_index=True)
     # 导出数据到csv文件
     combined_df.to_csv('processed_data/renting_data.csv', index=False, encoding='utf-8-sig')
     print('data processed successfully......')
@@ -60,7 +56,6 @@ def extract_room(layout):
     else:
         return ''
 
-data_merge()
 
 # 各城市数据统计
 def calculate_city_statistics():
@@ -96,7 +91,6 @@ def calculate_city_statistics():
     # 保存汇总结果到 CSV
     summary.to_csv('processed_data/renting_price_sta.csv', index=False, encoding='utf-8-sig')
 
-calculate_city_statistics()
 
 # 计算5个城市居室的情况
 def calculate_layout_statistics():
@@ -124,4 +118,19 @@ def calculate_layout_statistics():
     
     summary.to_csv('processed_data/renting_layout_sta.csv', index=False, encoding='utf-8-sig')
 
-calculate_layout_statistics()
+
+# 计算5个城市不同板块的均价
+def calculate_street_statistics(city_name):
+    df = pd.read_csv(f'processed_data/{city_name}.csv')
+    grouped = df.groupby(['城市代号', '城市', '街道', '区域'])
+    # 计算均价、最高价、最低价、中位数 
+    summary = grouped['价格（元/月）'].agg(avg='mean').reset_index()
+    summary = summary.round({'avg': 2})
+    summary.to_csv(f'processed_data/street_price/{city_name}.csv', index=False, encoding='utf-8-sig')
+
+
+# data_merge()
+# calculate_city_statistics()
+# calculate_layout_statistics()
+for city in city_names:
+    calculate_street_statistics(city)

@@ -1,5 +1,5 @@
 import pandas as pd
-from pyecharts.charts import Bar, Grid, Bar3D
+from pyecharts.charts import Bar, Grid, Bar3D, Geo
 from pyecharts import options as opts
 from pyecharts.globals import ThemeType
 
@@ -83,6 +83,7 @@ def price_analyze():
     grid.add_js_funcs(js_code)
     grid.render('house_data_tables/pyecharts/price_combine.html')  # 绘制保存
 
+# 5个城市不同居室的房租情况
 def layout_price_analyze():
     df = pd.read_csv('processed_data/renting_layout_sta.csv')
     
@@ -170,8 +171,13 @@ def layout_price_analyze():
     # 渲染图表
     bar3d.render('house_data_tables/pyecharts/layout_price_3d.html')
 
+# 5个城市的板块均价分布
+# def street_price_analyze():
+
 
 # 单位月租和整体月租的分析
-# price_analyze()
+price_analyze()
 # 居室价格的分析
 layout_price_analyze()
+# 5个城市的板块均价分布
+# street_price_analyze()
