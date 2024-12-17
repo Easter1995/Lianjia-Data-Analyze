@@ -41,7 +41,7 @@ class LianjiaSpider(scrapy.Spider):
 
     def start_requests(self):    
         # 读取 JSON 文件
-        for name in self.city_names:
+        for name in self.city_names: # 实现五个城市的数据一起抓取
             with open(f'url_data/{name}.json', 'r', encoding='utf-8') as f:
                 data = json.load(f)
             
@@ -65,7 +65,7 @@ class LianjiaSpider(scrapy.Spider):
         if captcha_button:
             self.logger.info("Captcha detected. Pausing execution...")
             time.sleep(30)  # 暂停30秒，你可以根据需要调整
-            return  # 返回，暂停后不继续执行后续代码
+            return
 
         page_empty = bool(response.xpath('//div[@class="content__empty1"]'))  # 超出页数范围,会有这个标签
         city_name = response.meta['city']  # 从 URL 中提取城市名称
