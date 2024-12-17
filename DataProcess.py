@@ -1,3 +1,4 @@
+import re
 import pandas as pd
 
 city_names = ['bj', 'sh', 'sz', 'gz', 'dali']
@@ -53,13 +54,16 @@ def data_merge():
 def extract_room(layout):
     if not layout or not isinstance(layout, str):  # 如果为空或非字符串
         return ''  # 返回空字符串
-    return layout.split('室')[0] if '室' in layout else ''
+    match = re.search(r'(\d+)(?=室|房间)', layout)
+    if match:
+        return int(match.group(1))  # 返回匹配到的数字
+    else:
+        return ''
 
 data_merge()
 
 # 各城市数据统计
 def calculate_city_statistics():
-    print("calculate data statistics......")
     df = pd.read_csv('processed_data/renting_data.csv')
     df['价格（元/月）'] = pd.to_numeric(df['价格（元/月）'], errors='coerce')
     df['单价（元/㎡）'] = pd.to_numeric(df['单价（元/㎡）'], errors='coerce')
@@ -90,7 +94,34 @@ def calculate_city_statistics():
     })
 
     # 保存汇总结果到 CSV
-    summary.to_csv('processed_data/renting_data_sta.csv', index=False, encoding='utf-8-sig')
-    print('calculate data statistics successfully......')
+    summary.to_csv('processed_data/renting_price_sta.csv', index=False, encoding='utf-8-sig')
 
 calculate_city_statistics()
+
+# 计算5个城市居室的情况
+def calculate_layout_statistics():
+    df = pd.read_csv('processed_data/renting_data.csv')
+    
+    # 将四居室以上合并为 "四居室以上"
+    df['居室'] = df['居室'].apply(lambda x: 4.0 if x >= 4 else x)
+    
+    grouped = df.groupby(['城市代号', '城市', '居室'])
+    
+    # 计算均价、最高价、最低价、中位数 
+    summary = grouped['价格（元/月）'].agg(
+        avg='mean',
+        max='max',
+        low='min',
+        mid='median'
+    ).reset_index()
+
+    summary = summary.round({
+        'avg': 2,
+        'max': 2,
+        'low': 2,
+        'mid': 2
+    })
+    
+    summary.to_csv('processed_data/renting_layout_sta.csv', index=False, encoding='utf-8-sig')
+
+calculate_layout_statistics()
