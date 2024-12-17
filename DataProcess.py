@@ -1,6 +1,4 @@
 import pandas as pd
-import re
-import os
 
 city_names = ['bj', 'sh', 'sz', 'gz', 'dali']
 city_mapping = {
