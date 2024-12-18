@@ -129,8 +129,8 @@ def calculate_street_statistics(city_name):
     summary.to_csv(f'processed_data/street_price/{city_name}.csv', index=False, encoding='utf-8-sig')
 
 
-data_merge()
-calculate_city_statistics()
-calculate_layout_statistics()
+data_merge() # 将五个城市的数据合并
+calculate_city_statistics() # 计算各城市的租金统计数据
+calculate_layout_statistics() # 计算各居室类型的租金统计数据
 for city in city_names:
-    calculate_street_statistics(city)
+    calculate_street_statistics(city) # 计算各城市不同板块的租金数据

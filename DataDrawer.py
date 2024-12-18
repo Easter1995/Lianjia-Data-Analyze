@@ -366,14 +366,9 @@ def gdp_unit_price_analyze():
     b.render('house_data_tables/pyecharts/gdp_salary.html')
 
 
-
-# price_analyze() # 单位月租和整体月租的分析
-
-# layout_price_analyze() # 居室价格的分析
-
-# for city_code in city_codes:
-#     street_price_analyze(city_code) # 5个城市的板块均价分布
-
-# direction_price_analyze() # 5个城市的不同朝向的价格分析
-
+price_analyze() # 单位月租和整体月租的分析
+layout_price_analyze() # 居室价格的分析
+for city_code in city_codes:
+    street_price_analyze(city_code) # 5个城市的板块均价分布
+direction_price_analyze() # 5个城市的不同朝向的价格分析
 gdp_unit_price_analyze() # 5个城市的人均gdp和单位面积租金分布的关系
