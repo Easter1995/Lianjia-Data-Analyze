@@ -1,5 +1,6 @@
 import scrapy
 from WebScraper.items import RentHouseURLs
+from scrapy_selenium import SeleniumRequest
 
 class UrlSpiderSpider(scrapy.Spider):
     name = "url_spider"
@@ -14,17 +15,7 @@ class UrlSpiderSpider(scrapy.Spider):
         "ftkrc_": "6d97c3ac-6236-4934-9c6e-3a8789d47a13",
         "lfrc_": "ddf035a8-9a2e-4cfd-8a63-c6b8dd091865",
         "_ga": "GA1.2.1928467867.1732110659",
-        "_ga_QJN1VP0CMS": "GS1.2.1734013530.3.0.1734013530.0.0.0",
-        "_ga_RCTBRFLNVS": "GS1.2.1732357751.2.0.1732357751.0.0.0",
-        "_ga_KJTRWRHDL1": "GS1.2.1734013530.4.0.1734013530.0.0.0",
-        "login_ucid": "2000000455074951",
-        "lianjia_token": "2.0012803a70453ab31b032d134151f3baf8",
-        "lianjia_token_secure": "2.0012803a70453ab31b032d134151f3baf8",
-        "security_ticket": "EUtjTccMx5nei42GfXNMtiAZuyZg66PYjxCd99yBl203g6oQB6ZLtVDRO+mOTmVhn17L9on4JzzWuDlZ0KwPBlIJv0TIW0zs3frUCoIxO/AEoCJu99OLlFAJ305bLnFBuhedNr9Yym8VkspxLWqm2vTe/qbDAu8qyQD9kylBxHo=",
-        "select_city": "110000",
-        "beikeBaseData": "%7B%22parentSceneId%22%3A%222021652502261744129%22%7D",
-        "lianjia_ssid": "dbfc4eb1-cc69-4759-827a-a02d98eea938",
-        "hip": "1VzdKhw6CmsWTeLG6KzwTT93Oq5zbaXCYiyxxWNyQ4c7Ghyu3_NCDCGSGNiKEuAZlcue9dE7gzJRCU7SUVBNa2v_-12IH1cfud4Utzl5-3ExLhPZqbAOPOlDH5mtSW6L_zhDmAnGQJyikrqc4rD1NLVNZ_RAj2VlEjPAGIk_kmsXT33J25Uc2OUmfA%3D%3D"
+        "_ga_QJN1VP0CMS": "GS1.2.1734013530.3.0.1734013530.0.0.0"
     }
 
     custom_settings = {
@@ -57,10 +48,11 @@ class UrlSpiderSpider(scrapy.Spider):
         for area in area_href_list[1:]:
             area_str = area.xpath('./@href').get().strip().split('/')[2]
             area_url = f"https://{city_name}.lianjia.com/zufang/{area_str}/pg1"
-            yield scrapy.Request(url=area_url, cookies=self.cookies, callback=self.parse_url, meta={
+            area_name = area.xpath('./text()').get()
+            yield SeleniumRequest(url=area_url, cookies=self.cookies, callback=self.parse_url, meta={
                 'city_name': city_name,
                 'district_name': dis_name,
-                'area_name': area_str,
+                'area_name': area_name,
                 'url': area_url,
             })
 
@@ -69,14 +61,15 @@ class UrlSpiderSpider(scrapy.Spider):
         district_list = response.xpath('//*[@id="filter"]/ul[2]/li')
         for dis in district_list[1:]:
             dis_str = dis.xpath('./a/@href').get().strip().split('/')[2]
+            dis_name = dis.xpath('./a/text()').get()
             # 每个区的起始url
             district_url = f"https://{city_name}.lianjia.com/zufang/{dis_str}/"
-            yield scrapy.Request(url=district_url, cookies=self.cookies, callback=self.get_area, meta={
+            yield SeleniumRequest(url=district_url, cookies=self.cookies, callback=self.get_area, meta={
                 'city_name': city_name,
-                'district_name': dis_str
+                'district_name': dis_name
             })
 
     def start_requests(self):    
-        for name in self.city_names:
+        # for name in self.city_names:
             # 每个城市的起始url
-            yield scrapy.Request(url=f"https://{name}.lianjia.com/zufang/", cookies=self.cookies, callback=self.get_district, meta={'city_name': name})
+            yield SeleniumRequest(url=f"https://sh.lianjia.com/zufang/", cookies=self.cookies, callback=self.get_district, meta={'city_name': 'sh'})
