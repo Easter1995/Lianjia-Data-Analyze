@@ -1,6 +1,6 @@
 import json
 import pandas as pd
-from pyecharts.charts import Bar, Grid, Bar3D, Geo, Radar
+from pyecharts.charts import Bar, Grid, Bar3D, Geo, Radar, Line
 from pyecharts import options as opts
 from pyecharts.globals import GeoType
 from collections import defaultdict
@@ -18,7 +18,7 @@ js_code = """
         }
     });
     """
-city_codes = ['bj', 'sh', 'sz', 'gz', 'dali']
+city_codes = ['bj', 'sh', 'gz', 'sz', 'dali']
 city_names = {
     'bj':'北京',
     'sh':'上海',
@@ -239,7 +239,7 @@ def street_price_analyze(city_code):
 # 5个城市的不同朝向的价格分析
 def direction_price_analyze():
     # 提取所有朝向
-    directions = ["东", "南", "西", "北", "东北", "东南", "西南", "西北"]
+    directions = ["北", "东北", "东", "东南", "南", "西南", "西", "西北"]
 
     ori_avgs = []
     max_radar = 0
@@ -293,13 +293,87 @@ def direction_price_analyze():
 
     radar.render('house_data_tables/pyecharts/orientation_unit_price.html')
     
+# 5个城市的人均gdp和单位面积租金分布的关系
+def gdp_unit_price_analyze():
+    with open('original_data/gdp/gdp.json', 'r', encoding='utf-8') as file:
+        gdp_file = json.load(file)
+
+    gdp = [item["gdp"] for item in gdp_file]
+    salary = [item["salary"] for item in gdp_file]
+
+    # 准备单位面积租金的数据
+    data = {}
+    data['avg'] = list()
+    data['mid'] = list()
+    for city_code in city_codes:
+        df = pd.read_csv(f'processed_data/{city_code}.csv')
+        avg_unit_price = round(df['单价（元/㎡）'].mean(), 2)
+        mid_unit_price = round(df['单价（元/㎡）'].median(), 2)    
+        data['avg'].append(avg_unit_price)
+        data['mid'].append(mid_unit_price)
+    
+    # 初始化柱状图
+    b = Bar(init_opts=opts.InitOpts(width='1400px', height='550px', page_title='人均gdp和单位面积租金分布关系分析'))
+    b.add_xaxis([city_names[city_code] for city_code in city_codes])
+    b.add_yaxis('单位面积月租金中位数', data['mid'], itemstyle_opts=opts.ItemStyleOpts(color='#f882b1'), z = 0)
+    b.add_yaxis('单位面积月租金平均数', data['avg'], itemstyle_opts=opts.ItemStyleOpts(color='#ed9d5f'), z = 0)
+
+    # 添加额外的坐标轴
+    b.extend_axis(
+        yaxis=opts.AxisOpts(name='人均GDP', name_textstyle_opts=opts.TextStyleOpts(font_weight='bold'), position="right",
+        axisline_opts=opts.AxisLineOpts(linestyle_opts=opts.LineStyleOpts(color="#B22222")))
+    )
+    b.extend_axis(
+        yaxis=opts.AxisOpts(name='人均工资', max_=max(salary), name_textstyle_opts=opts.TextStyleOpts(font_weight='bold'), position="right", offset=60,
+        axisline_opts=opts.AxisLineOpts(linestyle_opts=opts.LineStyleOpts(color="#5d2673")))
+    )
+
+    # 设置全局配置选项
+    b.set_global_opts(
+        legend_opts=opts.LegendOpts(selected_mode="mutiple", orient="horizontal", pos_bottom="bottom", pos_left='center'),
+        title_opts=opts.TitleOpts(title="各城市相关数据分布概览", pos_left='%5'),
+        yaxis_opts=opts.AxisOpts(
+            name='租金',
+            max_= max(map(int, data['avg'])) + 50,
+            axislabel_opts=opts.LabelOpts(formatter="{value} 元/平米"),
+            name_textstyle_opts=opts.TextStyleOpts(font_weight='bold'),
+            splitline_opts=opts.SplitLineOpts(is_show=False)
+        ),
+        xaxis_opts=opts.AxisOpts(name='城市', position='bottom', axislabel_opts=opts.LabelOpts(font_weight='bold', font_size=13))
+    )
+
+    # 初始化折线图并添加数据
+    l = Line(init_opts=opts.InitOpts(width='1100px', height='550px'))
+    l.add_xaxis([city_names[city_code] for city_code in city_codes])
+    l.add_yaxis('人均GDP', y_axis = gdp, yaxis_index=1, itemstyle_opts=opts.ItemStyleOpts(color='#B22222'),
+        label_opts=opts.LabelOpts(font_weight='bold'),
+        symbol_size=15, symbol='circle',
+        linestyle_opts=opts.LineStyleOpts(width=2, type_="dashed"))
+
+    l2 = Line(init_opts=opts.InitOpts(width='1100px', height='550px'))
+    l2.add_xaxis([city_names[city_code] for city_code in city_codes])
+    l2.add_yaxis('人均工资性收入', y_axis = salary, yaxis_index=2, itemstyle_opts=opts.ItemStyleOpts(color='#5d2673'),
+        label_opts=opts.LabelOpts(font_weight='bold'),
+        symbol_size=15, symbol='circle',
+        linestyle_opts=opts.LineStyleOpts(width=2, type_="dashed"))
+
+    # 叠加折线图到柱状图上
+    b.overlap(l)
+    b.overlap(l2)
+
+    # 渲染图表
+    b.add_js_funcs(js_code)
+    b.render('house_data_tables/pyecharts/gdp_salary.html')
 
 
-# 单位月租和整体月租的分析
-# price_analyze()
-# 居室价格的分析
-# layout_price_analyze()
-# 5个城市的板块均价分布
+
+# price_analyze() # 单位月租和整体月租的分析
+
+# layout_price_analyze() # 居室价格的分析
+
 # for city_code in city_codes:
-#     street_price_analyze(city_code)
-direction_price_analyze()
+#     street_price_analyze(city_code) # 5个城市的板块均价分布
+
+# direction_price_analyze() # 5个城市的不同朝向的价格分析
+
+gdp_unit_price_analyze() # 5个城市的人均gdp和单位面积租金分布的关系
