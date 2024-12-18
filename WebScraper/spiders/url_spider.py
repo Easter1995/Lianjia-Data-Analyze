@@ -70,6 +70,6 @@ class UrlSpiderSpider(scrapy.Spider):
             })
 
     def start_requests(self):    
-        # for name in self.city_names:
+        for name in self.city_names:
             # 每个城市的起始url
-            yield SeleniumRequest(url=f"https://sh.lianjia.com/zufang/", cookies=self.cookies, callback=self.get_district, meta={'city_name': 'sh'})
+            yield SeleniumRequest(url=f"https://{name}.lianjia.com/zufang/", cookies=self.cookies, callback=self.get_district, meta={'city_name': name})
