@@ -1,8 +1,9 @@
 import json
 import pandas as pd
-from pyecharts.charts import Bar, Grid, Bar3D, Geo
+from pyecharts.charts import Bar, Grid, Bar3D, Geo, Radar
 from pyecharts import options as opts
 from pyecharts.globals import GeoType
+from collections import defaultdict
 import matplotlib as mpl
 
 js_code = """
@@ -23,8 +24,26 @@ city_names = {
     'sh':'上海',
     'gz':'广州',
     'sz':'深圳',
-    'dali':'大理白族自治州'
+    'dali':'大理'
 }
+
+# 根据类型的最大值来产生颜色
+def generate_color(max_value):
+    res = []
+    cur = 0
+    path = 1000
+    while cur <= max_value:
+        res.append({'min': cur, 'max': cur + path, 'color': '#'})
+        cur += path
+        path = 100000 if cur >= 100000 else (10000 if cur >= 10000 else 1000)
+    cmap = mpl.cm.get_cmap('RdYlBu_r', len(res))(range(len(res)))
+    for i in range(len(res)):
+        rgb = cmap[i]
+        code = '#'
+        for j in range(3):
+            code += str(hex(int(rgb[j]*255)))[-2:].replace('x', '0').upper()
+        res[i]['color'] = code
+    return res
 
 # 5个城市的总体房租情况
 def price_analyze():
@@ -182,23 +201,6 @@ def layout_price_analyze():
     bar3d.render('house_data_tables/pyecharts/layout_price_3d.html')
 
 # 5个城市的街道价格分析
-def generate_color(max_value):
-    res = []
-    cur = 0
-    path = 1000
-    while cur <= max_value:
-        res.append({'min': cur, 'max': cur + path, 'color': '#'})
-        cur += path
-        path = 100000 if cur >= 100000 else (10000 if cur >= 10000 else 1000)
-    cmap = mpl.cm.get_cmap('RdYlBu_r', len(res))(range(len(res)))
-    for i in range(len(res)):
-        rgb = cmap[i]
-        code = '#'
-        for j in range(3):
-            code += str(hex(int(rgb[j]*255)))[-2:].replace('x', '0').upper()
-        res[i]['color'] = code
-    return res
-
 def street_price_analyze(city_code):
     # 读取 CSV 文件
     df = pd.read_csv(f'processed_data/street_price/{city_code}.csv')
@@ -207,6 +209,8 @@ def street_price_analyze(city_code):
     
     # 获取城市名称
     city_name = city_names[city_code]
+    if city_code == 'dali':
+        city_name = '大理白族自治州'
     g = Geo(init_opts=opts.InitOpts(width='1500px', height='750px', page_title='不同板块的平均月租'))
 
     g.add_schema(maptype=city_name)
@@ -232,7 +236,63 @@ def street_price_analyze(city_code):
     # 渲染图表
     g.render(f'house_data_tables/street_price/{city_code}.html')
     
+# 5个城市的不同朝向的价格分析
+def direction_price_analyze():
+    # 提取所有朝向
+    directions = ["东", "南", "西", "北", "东北", "东南", "西南", "西北"]
 
+    ori_avgs = []
+    max_radar = 0
+
+    # 统计每个城市的朝向的单价
+    for city_code in city_codes:
+        ori_prices = defaultdict(list)
+        df = pd.read_csv(f'processed_data/{city_code}.csv')
+        
+        # 计算平均值，将南 北这样的朝向算进朝南和朝北
+        for _, row in df.iterrows():
+            price_per_m2 = row['单价（元/㎡）'] # 提取单价
+            if isinstance(row['朝向'], str) and row['朝向'] != 'nan':
+                oris = row['朝向'].split()
+            else:
+                continue  # 如果是 NaN 或无效值，跳过
+
+            for ori in oris:
+                if ori in directions:
+                    ori_prices[ori].append(price_per_m2) # 将单价装入对应的朝向
+
+        orientation_avg = {orientation: round(sum(prices) / len(prices), 2) for orientation, prices in ori_prices.items()}
+        max_item = max(orientation_avg.values())
+        if max_item > max_radar:
+            max_radar = max_item
+
+        ori_avgs.append({city_code: orientation_avg})
+    
+    # 画雷达图
+    radar = (
+        Radar(init_opts=opts.InitOpts(width='1500px', height='750px', page_title='5个城市不同朝向房屋价格分析'))
+        .add_schema(
+            schema=[opts.RadarIndicatorItem(name=direction, max_=max_radar) for direction in directions]
+        )
+    )
+    color_list = ['#5793f3', '#d14a61', '#675bba', '#f58220', '#91cc75']  # 定义不同颜色列表，用于区分不同城市
+    for index, data in enumerate(ori_avgs):
+        city_code = list(data.keys())[0]
+        city_name = city_names[list(data.keys())[0]]  # 获取对应的中文城市名称
+        orientation_avg = data[city_code]
+        values = [orientation_avg.get(direction, 0) for direction in directions]  # 获取对应方向的价格平均值，不存在则设为0
+        radar.add(city_name, [values], color=color_list[index % len(color_list)],
+                  label_opts=opts.LabelOpts(is_show=True))  # 添加数据到雷达图，设置不同颜色及显示标签
+
+    radar.set_global_opts(
+        title_opts=opts.TitleOpts(title="5个城市不同朝向房屋价格分析", pos_left='center'),
+        legend_opts=opts.LegendOpts(pos_top='5%', pos_left='center')
+    )
+
+    radar.add_js_funcs(js_code)
+
+    radar.render('house_data_tables/pyecharts/orientation_unit_price.html')
+    
 
 
 # 单位月租和整体月租的分析
@@ -240,5 +300,6 @@ def street_price_analyze(city_code):
 # 居室价格的分析
 # layout_price_analyze()
 # 5个城市的板块均价分布
-for city_code in city_codes:
-    street_price_analyze(city_code)
+# for city_code in city_codes:
+#     street_price_analyze(city_code)
+direction_price_analyze()
