@@ -123,14 +123,14 @@ def calculate_layout_statistics():
 def calculate_street_statistics(city_name):
     df = pd.read_csv(f'processed_data/{city_name}.csv')
     grouped = df.groupby(['城市代号', '城市', '街道', '区域'])
-    # 计算均价、最高价、最低价、中位数 
+    # 计算均价
     summary = grouped['价格（元/月）'].agg(avg='mean').reset_index()
     summary = summary.round({'avg': 2})
     summary.to_csv(f'processed_data/street_price/{city_name}.csv', index=False, encoding='utf-8-sig')
 
 
-# data_merge()
-# calculate_city_statistics()
-# calculate_layout_statistics()
+data_merge()
+calculate_city_statistics()
+calculate_layout_statistics()
 for city in city_names:
     calculate_street_statistics(city)

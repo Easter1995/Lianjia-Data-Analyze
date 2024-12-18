@@ -1,3 +1,4 @@
+import json
 import pandas as pd
 from pyecharts.charts import Bar, Grid, Bar3D, Geo
 from pyecharts import options as opts
@@ -16,7 +17,14 @@ js_code = """
         }
     });
     """
-city_code = ['bj', 'sh', 'sz', 'gz', 'dali']
+city_codes = ['bj', 'sh', 'sz', 'gz', 'dali']
+city_names = {
+    'bj':'北京',
+    'sh':'上海',
+    'gz':'广州',
+    'sz':'深圳',
+    'dali':'大理白族自治州'
+}
 
 # 5个城市的总体房租情况
 def price_analyze():
@@ -173,6 +181,7 @@ def layout_price_analyze():
     # 渲染图表
     bar3d.render('house_data_tables/pyecharts/layout_price_3d.html')
 
+# 5个城市的街道价格分析
 def generate_color(max_value):
     res = []
     cur = 0
@@ -193,37 +202,36 @@ def generate_color(max_value):
 def street_price_analyze(city_code):
     # 读取 CSV 文件
     df = pd.read_csv(f'processed_data/street_price/{city_code}.csv')
-    g = Geo(init_opts=opts.InitOpts(width='1500px', height='750px'))
+    with open(f'original_data/pos/{city_code}.json', 'r', encoding='utf-8') as f:
+        pos_data = json.load(f)
     
     # 获取城市名称
-    city_name = df['城市'].unique()[0]
+    city_name = city_names[city_code]
+    g = Geo(init_opts=opts.InitOpts(width='1500px', height='750px', page_title='不同板块的平均月租'))
+
     g.add_schema(maptype=city_name)
     
     # 准备数据对
     data_pair = [(row['街道'], row['avg']) for _, row in df.iterrows()]
-    
-    # 过滤无效的坐标数据
-    data_pair = [(name, value) for name, value in data_pair if g.get_coordinate(name) is not None]
-    data_pair.sort(key=lambda x: x[1])
-    
-    # 添加数据到地图
+    data_pair.sort(key=lambda x:x[1])
+
+    for data in pos_data:
+        g.add_coordinate(data['street'], data['y'], data['x'])
+
+    # 添加数据到Geo图
     g.add('', data_pair, type_=GeoType.EFFECT_SCATTER, symbol_size=5)
     g.set_series_opts(label_opts=opts.LabelOpts(is_show=False))
-    
-    # 设置颜色映射
-    max_price = df['avg'].max()
+    # 颜色映射
+    max_price = max(price for _, price in data_pair)
     pieces = generate_color(max_price)
-    
     g.set_global_opts(
         visualmap_opts=opts.VisualMapOpts(is_piecewise=True, pieces=pieces),
-        title_opts=opts.TitleOpts(
-            title=f'{city_name}街道平均月租房价格',
-            pos_left='5%'
-        )
+        title_opts=opts.TitleOpts(title=f'{city_name}市不同板块平均月租分布图(元/月)', pos_left='5%')
     )
+
+    # 渲染图表
+    g.render(f'house_data_tables/street_price/{city_code}.html')
     
-    # 渲染到 HTML
-    g.render(f'house_data_tables/street_price/{city_code}_street_price.html')
 
 
 
@@ -232,5 +240,5 @@ def street_price_analyze(city_code):
 # 居室价格的分析
 # layout_price_analyze()
 # 5个城市的板块均价分布
-for city in city_code:
-    street_price_analyze(city)
+for city_code in city_codes:
+    street_price_analyze(city_code)

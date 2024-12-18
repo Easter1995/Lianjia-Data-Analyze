@@ -2,16 +2,17 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>Awesome-pyecharts</title>
+    <title>不同板块的平均月租</title>
                 <script type="text/javascript" src="https://assets.pyecharts.org/assets/v5/echarts.min.js"></script>
+            <script type="text/javascript" src="https://assets.pyecharts.org/assets/v5/maps/yun2_nan2_da4_li3_bai2_zu2_zi4_zhi4_zhou1.js"></script>
 
 </head>
 <body >
-    <div id="44734a0dff344dfb8ae3200e347a78cf" class="chart-container" style="width:1500px; height:750px; "></div>
+    <div id="e7e9680064a34e96af8e2679e9fd247f" class="chart-container" style="width:1500px; height:750px; "></div>
     <script>
-        var chart_44734a0dff344dfb8ae3200e347a78cf = echarts.init(
-            document.getElementById('44734a0dff344dfb8ae3200e347a78cf'), 'white', {renderer: 'canvas'});
-        var option_44734a0dff344dfb8ae3200e347a78cf = {
+        var chart_e7e9680064a34e96af8e2679e9fd247f = echarts.init(
+            document.getElementById('e7e9680064a34e96af8e2679e9fd247f'), 'white', {renderer: 'canvas'});
+        var option_e7e9680064a34e96af8e2679e9fd247f = {
     "animation": true,
     "animationThreshold": 2000,
     "animationDuration": 1000,
@@ -48,34 +49,50 @@
             "symbolSize": 5,
             "data": [
                 {
+                    "name": "\u51e4\u4eea",
+                    "value": [
+                        100.316835,
+                        25.58625,
+                        1680.86
+                    ]
+                },
+                {
                     "name": "\u5e02\u533a",
                     "value": [
-                        115.48,
-                        38.87,
+                        100.301614,
+                        25.678466,
                         2665.51
                     ]
                 },
                 {
                     "name": "\u4e0b\u5173\u5317\u533a",
                     "value": [
-                        118.73,
-                        32.08,
+                        100.233357,
+                        25.586436,
                         2903.78
+                    ]
+                },
+                {
+                    "name": "\u6ee1\u6c5f\u7247\u533a",
+                    "value": [
+                        100.278016,
+                        25.610408,
+                        2964.07
                     ]
                 },
                 {
                     "name": "\u6d77\u4e1c",
                     "value": [
-                        102.12,
-                        36.5,
+                        100.276933,
+                        25.666645,
                         5541.39
                     ]
                 },
                 {
                     "name": "\u53e4\u57ce",
                     "value": [
-                        100.23,
-                        26.88,
+                        100.169761,
+                        25.688865,
                         7468.35
                     ]
                 }
@@ -140,7 +157,7 @@
     "title": [
         {
             "show": true,
-            "text": "\u5927\u7406\u8857\u9053\u5e73\u5747\u6708\u79df\u623f\u4ef7\u683c",
+            "text": "\u5927\u7406\u767d\u65cf\u81ea\u6cbb\u5dde\u5e02\u4e0d\u540c\u677f\u5757\u5e73\u5747\u6708\u79df\u5206\u5e03\u56fe(\u5143/\u6708)",
             "target": "blank",
             "subtarget": "blank",
             "left": "5%",
@@ -217,7 +234,7 @@
         ]
     },
     "geo": {
-        "map": "\u5927\u7406",
+        "map": "\u5927\u7406\u767d\u65cf\u81ea\u6cbb\u5dde",
         "roam": true,
         "aspectScale": 0.75,
         "nameProperty": "name",
@@ -225,7 +242,7 @@
         "emphasis": {}
     }
 };
-        chart_44734a0dff344dfb8ae3200e347a78cf.setOption(option_44734a0dff344dfb8ae3200e347a78cf);
+        chart_e7e9680064a34e96af8e2679e9fd247f.setOption(option_e7e9680064a34e96af8e2679e9fd247f);
     </script>
 </body>
 </html>
