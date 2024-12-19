@@ -59,6 +59,7 @@ def extract_room(layout):
 
 # 各城市数据统计
 def calculate_city_statistics():
+    print('city rent price analyza start...')
     df = pd.read_csv('processed_data/renting_data.csv')
     df['价格（元/月）'] = pd.to_numeric(df['价格（元/月）'], errors='coerce')
     df['单价（元/㎡）'] = pd.to_numeric(df['单价（元/㎡）'], errors='coerce')
@@ -90,10 +91,12 @@ def calculate_city_statistics():
 
     # 保存汇总结果到 CSV
     summary.to_csv('processed_data/renting_price_sta.csv', index=False, encoding='utf-8-sig')
+    print('city rent price analyza end...')
 
 
 # 计算5个城市居室的情况
 def calculate_layout_statistics():
+    print('city rent layout-price analyza start...')
     df = pd.read_csv('processed_data/renting_data.csv')
     
     # 将四居室以上合并为 "四居室以上"
@@ -117,16 +120,20 @@ def calculate_layout_statistics():
     })
     
     summary.to_csv('processed_data/renting_layout_sta.csv', index=False, encoding='utf-8-sig')
+    print('city rent layout-price analyza end...')
 
 
 # 计算5个城市不同板块的均价
 def calculate_street_statistics(city_name):
+    print('city rent street-price analyza end...')
+
     df = pd.read_csv(f'processed_data/{city_name}.csv')
     grouped = df.groupby(['城市代号', '城市', '街道', '区域'])
     # 计算均价
     summary = grouped['价格（元/月）'].agg(avg='mean').reset_index()
     summary = summary.round({'avg': 2})
     summary.to_csv(f'processed_data/street_price/{city_name}.csv', index=False, encoding='utf-8-sig')
+    print('city rent street-price analyza end...')
 
 
 data_merge() # 将五个城市的数据合并

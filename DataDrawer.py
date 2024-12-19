@@ -47,6 +47,7 @@ def generate_color(max_value):
 
 # 5个城市的总体房租情况
 def price_analyze():
+    print('draw rent price...')
     # 读取数据
     df = pd.read_csv('processed_data/renting_price_sta.csv')
 
@@ -114,6 +115,7 @@ def price_analyze():
 
 # 5个城市不同居室的房租情况
 def layout_price_analyze():
+    print('draw layout-price...')
     df = pd.read_csv('processed_data/renting_layout_sta.csv')
     
     layout_types = [1.0, 2.0, 3.0, 4.0]
@@ -202,6 +204,8 @@ def layout_price_analyze():
 
 # 5个城市的街道价格分析
 def street_price_analyze(city_code):
+    print('draw street-price...')
+    
     # 读取 CSV 文件
     df = pd.read_csv(f'processed_data/street_price/{city_code}.csv')
     with open(f'original_data/pos/{city_code}.json', 'r', encoding='utf-8') as f:
@@ -238,6 +242,8 @@ def street_price_analyze(city_code):
     
 # 5个城市的不同朝向的价格分析
 def direction_price_analyze():
+    print('draw orientation-price...')
+
     # 提取所有朝向
     directions = ["北", "东北", "东", "东南", "南", "西南", "西", "西北"]
 
@@ -295,6 +301,8 @@ def direction_price_analyze():
     
 # 5个城市的人均gdp和单位面积租金分布的关系
 def gdp_unit_price_analyze():
+    print('draw gdp-salary-price...')
+
     with open('original_data/gdp/gdp.json', 'r', encoding='utf-8') as file:
         gdp_file = json.load(file)
 

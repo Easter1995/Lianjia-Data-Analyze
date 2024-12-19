@@ -322,25 +322,23 @@ class LianjiaProxyMiddleware(object):
  
     def process_exception(self, request, exception, spider):
         if str(exception).find('407') != -1:
-            self.proxies = []
+            self.update_proxies()
             return request
         else:
             return request
  
     def get_proxy(self):
-        for _ in range(3):  # 尝试 3 次
-            try:
-                response = requests.get('https://share.proxy.qg.net/get?key=643E2DA4&num=2')
-                if response.status_code == 200:
-                    res_data = response.json()
-                    if res_data['code'] == "SUCCESS":
-                        return [p['server'] for p in res_data['data']]
-                    else:
-                        self.logger.error(f"代理池返回错误: {res_data}")
-                time.sleep(2)  # 暂停 2 秒后重试
-            except requests.RequestException:
-                time.sleep(2)  # 请求异常时重试
-        return []  # 如果都失败了，返回空列表
+        try:
+            response = requests.get('https://share.proxy.qg.net/get?key=DADEA1E5&num=2&pwd=369DE9E8039A')
+            if response.status_code == 200:
+                res_data = response.json()
+                if res_data['code'] == "SUCCESS":
+                    return [p['server'] for p in res_data['data']]
+                else:
+                    self.logger.error(f"代理池返回错误: {res_data}")
+            time.sleep(2)  # 暂停 2 秒后重试
+        except requests.RequestException:
+            time.sleep(2)  # 请求异常时重试
  
     def update_proxies(self):
         self.proxies = []
