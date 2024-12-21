@@ -34,17 +34,57 @@ def data_merge():
         "居室": "居室"
     }
 
+    # 异常值判断函数
+    def is_valid(item):
+        # 车库和未知户型去除
+        if item["name"] and "车库" in item["name"]:
+            return False
+        if item["layout"] and "未知" in item["layout"]:
+            return False
+        # 单价异常值去除
+        if item["price_per_m2"] <= 2:
+            return False
+        # 面积异常值去除
+        if item["square"] < 10 or item["square"] > 2000:
+            return False
+        # 总价格异常值去除
+        if item["price"] < 100:
+            return False
+        return True
+
     for name in city_names:
+        unique_data = set()  # 用于去重后的数据存储
         data = pd.read_json(f'original_data/{name}.json')
+
+        # 数据清洗和去重处理
         data['城市'] = data['city'].map(city_mapping)
         data['居室'] = data['layout'].apply(extract_room)
-        data = data.rename(columns=columns)
-        data.to_csv(f'processed_data/{name}.csv')
-        merged_data.append(data)
+        
+        # 过滤异常值
+        cleaned_data = data[data.apply(is_valid, axis=1)]
+        
+        # 将每一行的数据转化为元组，添加到集合中实现去重
+        for index, row in cleaned_data.iterrows():
+            row_tuple = tuple(row.values)  # 获取整行的值作为元组
+            unique_data.add(row_tuple)  # 将元组添加到集合中去重
 
+        cleaned_data = pd.DataFrame(list(unique_data), columns=cleaned_data.columns)  # 转换回DataFrame格式
+
+        # 重命名列头
+        cleaned_data = cleaned_data.rename(columns=columns)
+        
+        # 导出每个城市的处理后的数据
+        cleaned_data.to_csv(f'processed_data/{name}.csv', index=False)
+
+        # 将清洗后的数据合并到整体数据中
+        merged_data.append(cleaned_data)
+
+    # 合并所有城市的数据
     combined_df = pd.concat(merged_data, ignore_index=True)
+
     # 导出数据到csv文件
     combined_df.to_csv('processed_data/renting_data.csv', index=False, encoding='utf-8-sig')
+
     print('data processed successfully......')
     
 def extract_room(layout):

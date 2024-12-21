@@ -7,10 +7,10 @@
 
 </head>
 <body >
-    <div id="70bef829023748d9a19fc8957ce05242" class="chart-container" style="width:1400px; height:550px; "></div>
+    <div id="2f965c2ae9ea43909be6a04123d0753e" class="chart-container" style="width:1400px; height:550px; "></div>
     <script>
-        var chart_70bef829023748d9a19fc8957ce05242 = echarts.init(
-            document.getElementById('70bef829023748d9a19fc8957ce05242'), 'white', {renderer: 'canvas'});
+        var chart_2f965c2ae9ea43909be6a04123d0753e = echarts.init(
+            document.getElementById('2f965c2ae9ea43909be6a04123d0753e'), 'white', {renderer: 'canvas'});
             
     document.addEventListener("DOMContentLoaded", function() {
         const chartContainer = document.querySelector(".chart-container");
@@ -23,7 +23,7 @@
         }
     });
     
-        var option_70bef829023748d9a19fc8957ce05242 = {
+        var option_2f965c2ae9ea43909be6a04123d0753e = {
     "animation": true,
     "animationThreshold": 2000,
     "animationDuration": 1000,
@@ -234,6 +234,66 @@
             },
             "zlevel": 0,
             "z": 0
+        },
+        {
+            "type": "line",
+            "name": "\u5de5\u8d44\u4e0e\u623f\u79df\u7684\u6bd4\u4f8b",
+            "connectNulls": false,
+            "xAxisIndex": 0,
+            "yAxisIndex": 3,
+            "symbol": "circle",
+            "symbolSize": 15,
+            "showSymbol": true,
+            "smooth": false,
+            "clip": true,
+            "step": false,
+            "stackStrategy": "samesign",
+            "data": [
+                [
+                    "\u5317\u4eac",
+                    551.57
+                ],
+                [
+                    "\u4e0a\u6d77",
+                    943.12
+                ],
+                [
+                    "\u5e7f\u5dde",
+                    615.64
+                ],
+                [
+                    "\u6df1\u5733",
+                    867.86
+                ],
+                [
+                    "\u5927\u7406",
+                    619.81
+                ]
+            ],
+            "hoverAnimation": true,
+            "label": {
+                "show": true,
+                "margin": 8,
+                "fontWeight": "bold",
+                "valueAnimation": false
+            },
+            "logBase": 10,
+            "seriesLayoutBy": "column",
+            "lineStyle": {
+                "show": true,
+                "width": 2,
+                "opacity": 1,
+                "curveness": 0,
+                "type": "dashed"
+            },
+            "areaStyle": {
+                "opacity": 0
+            },
+            "itemStyle": {
+                "color": "#322816"
+            },
+            "zlevel": 0,
+            "z": 0
         }
     ],
     "legend": [
@@ -242,7 +302,8 @@
                 "\u5355\u4f4d\u9762\u79ef\u6708\u79df\u91d1\u4e2d\u4f4d\u6570",
                 "\u5355\u4f4d\u9762\u79ef\u6708\u79df\u91d1\u5e73\u5747\u6570",
                 "\u4eba\u5747GDP",
-                "\u4eba\u5747\u5de5\u8d44\u6027\u6536\u5165"
+                "\u4eba\u5747\u5de5\u8d44\u6027\u6536\u5165",
+                "\u5de5\u8d44\u4e0e\u623f\u79df\u7684\u6bd4\u4f8b"
             ],
             "selected": {},
             "selectedMode": "mutiple",
@@ -474,6 +535,55 @@
             "animationDurationUpdate": 300,
             "animationEasingUpdate": "cubicOut",
             "animationDelayUpdate": 0
+        },
+        {
+            "name": "\u5de5\u8d44/\u623f\u79df",
+            "show": true,
+            "scale": false,
+            "nameLocation": "end",
+            "nameGap": 15,
+            "nameTextStyle": {
+                "fontWeight": "bold"
+            },
+            "gridIndex": 0,
+            "axisLine": {
+                "show": true,
+                "onZero": true,
+                "onZeroAxisIndex": 0,
+                "lineStyle": {
+                    "show": true,
+                    "width": 1,
+                    "opacity": 1,
+                    "curveness": 0,
+                    "type": "solid",
+                    "color": "#322816"
+                }
+            },
+            "inverse": false,
+            "position": "left",
+            "offset": 100,
+            "splitNumber": 5,
+            "min": 451,
+            "max": 1943,
+            "minInterval": 0,
+            "splitLine": {
+                "show": true,
+                "lineStyle": {
+                    "show": true,
+                    "width": 1,
+                    "opacity": 1,
+                    "curveness": 0,
+                    "type": "solid"
+                }
+            },
+            "animation": true,
+            "animationThreshold": 2000,
+            "animationDuration": 1000,
+            "animationEasing": "cubicOut",
+            "animationDelay": 0,
+            "animationDurationUpdate": 300,
+            "animationEasingUpdate": "cubicOut",
+            "animationDelayUpdate": 0
         }
     ],
     "title": [
@@ -491,7 +601,7 @@
         }
     ]
 };
-        chart_70bef829023748d9a19fc8957ce05242.setOption(option_70bef829023748d9a19fc8957ce05242);
+        chart_2f965c2ae9ea43909be6a04123d0753e.setOption(option_2f965c2ae9ea43909be6a04123d0753e);
     </script>
 </body>
 </html>

@@ -101,7 +101,7 @@ def price_analyze():
     bar_unit.set_global_opts(
         title_opts=opts.TitleOpts(title="各城市租房单位面积租金分析", pos_bottom=True, pos_left="center"),
         xaxis_opts=opts.AxisOpts(name="租金类型", position="top"),
-        yaxis_opts=opts.AxisOpts(name="租金(元/㎡)", type_="log", is_inverse=True),
+        yaxis_opts=opts.AxisOpts(name="租金(元/㎡)", type_="value", is_inverse=True),
         tooltip_opts=opts.TooltipOpts(is_show=True),
         legend_opts=opts.LegendOpts(is_show=False) 
     )
@@ -140,7 +140,6 @@ def layout_price_analyze():
     city_name = {'bj': '北京', 'dali': '大理', 'gz': '广州', 'sh': '上海', 'sz': '深圳'}
     label = []
     layout_tags = ['\n一居', '\n二居', '\n三居', '\n四居及以上']
-    city_name = {'bj': '北京', 'dali': '大理', 'sh': '上海', 'gz': '广州', 'sz': '深圳'}
 
     # 构造 x 轴标签：每个居室类型和城市的组合
     for tag in layout_tags:
@@ -320,6 +319,8 @@ def gdp_unit_price_analyze():
         data['avg'].append(avg_unit_price)
         data['mid'].append(mid_unit_price)
     
+    ratio = [round(s/avg, 2) for s, avg in zip(salary, data['avg'])]
+
     # 初始化柱状图
     b = Bar(init_opts=opts.InitOpts(width='1400px', height='550px', page_title='人均gdp和单位面积租金分布关系分析'))
     b.add_xaxis([city_names[city_code] for city_code in city_codes])
@@ -334,6 +335,10 @@ def gdp_unit_price_analyze():
     b.extend_axis(
         yaxis=opts.AxisOpts(name='人均工资', max_=max(salary), name_textstyle_opts=opts.TextStyleOpts(font_weight='bold'), position="right", offset=60,
         axisline_opts=opts.AxisLineOpts(linestyle_opts=opts.LineStyleOpts(color="#5d2673")))
+    )
+    b.extend_axis(
+        yaxis=opts.AxisOpts(name='工资/房租', max_=int(max(ratio)) + 1000, min_=int(min(ratio)) - 100, name_textstyle_opts=opts.TextStyleOpts(font_weight='bold'), position="left", offset=100,
+        axisline_opts=opts.AxisLineOpts(linestyle_opts=opts.LineStyleOpts(color="#322816")))
     )
 
     # 设置全局配置选项
@@ -364,10 +369,18 @@ def gdp_unit_price_analyze():
         label_opts=opts.LabelOpts(font_weight='bold'),
         symbol_size=15, symbol='circle',
         linestyle_opts=opts.LineStyleOpts(width=2, type_="dashed"))
+    
+    l3 = Line(init_opts=opts.InitOpts(width='1100px', height='550px'))
+    l3.add_xaxis([city_names[city_code] for city_code in city_codes])
+    l3.add_yaxis('工资与房租的比例', y_axis = ratio, yaxis_index=3, itemstyle_opts=opts.ItemStyleOpts(color='#322816'),
+        label_opts=opts.LabelOpts(font_weight='bold'),
+        symbol_size=15, symbol='circle',
+        linestyle_opts=opts.LineStyleOpts(width=2, type_="dashed"))
 
     # 叠加折线图到柱状图上
     b.overlap(l)
     b.overlap(l2)
+    b.overlap(l3)
 
     # 渲染图表
     b.add_js_funcs(js_code)
