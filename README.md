@@ -1,48 +1,4 @@
-<div class="cover" style="page-break-after:always;font-family:方正公文仿宋;width:100%;height:100%;border:none;margin: 0 auto;text-align:center;">
-    <div style="width:60%;margin: 0 auto;height:0;padding-bottom:10%;">
-        </br>
-    </div>
-    </br></br></br></br></br>
-    <div style="width:60%;margin: 0 auto;height:0;padding-bottom:40%;">
-        <img src="C:\Users\cyh\AppData\Roaming\Typora\themes\latex-theme-windows\resources\校徽.png" alt="校徽" style="width:100%;"/>
-	</div>
-    </br></br></br></br></br></br></br></br>
-    <span style="font-family:华文黑体Bold;text-align:center;font-size:20pt;margin: 10pt auto;line-height:30pt;">租房数据分析说明文档</span>
-    <p style="text-align:center;font-size:14pt;margin: 0 auto">北京、上海、广州、深圳、大理的链家租房数据分析</p>
-    </br>
-    </br>
-    <table style="border:none;text-align:center;width:72%;font-family:仿宋;font-size:14px; margin: 0 auto;">
-    <tbody style="font-family:方正公文仿宋;font-size:12pt;">
-    	<tr style="font-weight:normal;"> 
-    		<td style="width:20%;text-align:right;">授课教师</td>
-    		<td style="width:2%">：</td> 
-    		<td style="width:40%;font-weight:normal;border-bottom: 1px solid;text-align:center;font-family:华文仿宋">王纯 </td>     </tr>
-    	<tr style="font-weight:normal;"> 
-    		<td style="width:20%;text-align:right;">姓　　名</td>
-    		<td style="width:2%">：</td> 
-    		<td style="width:40%;font-weight:normal;border-bottom: 1px solid;text-align:center;font-family:华文仿宋"> 陈韵涵</td>     </tr>
-    	<tr style="font-weight:normal;"> 
-    		<td style="width:20%;text-align:right;">学　　号</td>
-    		<td style="width:2%">：</td> 
-    		<td style="width:40%;font-weight:normal;border-bottom: 1px solid;text-align:center;font-family:华文仿宋">2022211388 </td>     </tr>
-    	<tr style="font-weight:normal;"> 
-    		<td style="width:20%;text-align:right;">班　　级</td>
-    		<td style="width:%">：</td> 
-    		<td style="width:40%;font-weight:normal;border-bottom: 1px solid;text-align:center;font-family:华文仿宋"> 2022211311</td>     </tr>
-    	<tr style="font-weight:normal;"> 
-    		<td style="width:20%;text-align:right;">日　　期</td>
-    		<td style="width:2%">：</td> 
-    		<td style="width:40%;font-weight:normal;border-bottom: 1px solid;text-align:center;font-family:华文仿宋">2024/12/20</td>     </tr>
-    </tbody>              
-    </table>
-	</br></br></br></br></br>
-</div>
-
-<!-- 注释语句：导出PDF时会在这里分页 -->
-
 [toc]
-
-<!-- 注释语句：导出PDF时会在这里分页 -->
 
 # 租房数据分析说明文档
 
@@ -799,7 +755,7 @@
 
 ### 城市人均GDP、人均工资性收入和单位面积租金的关系
 
-![image-20241221111217847](C:\Users\cyh\AppData\Roaming\Typora\typora-user-images\image-20241221111217847.png)
+![image-20241221111217847](https://cdn.jsdelivr.net/gh/Easter1995/blog-image/202412211129018.png)
 
 通过柱状图和折线图的对比可以看出，各城市的单位面积月租金中位数、平均数基本和人均GDP以及人均工资性收入呈正相关。除北京外，人均GDP也和人均工资性收入呈正相关；而北京的人均GDP高于上海和深圳，人均工资性收入却低于上海和深圳。
 
